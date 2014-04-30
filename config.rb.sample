@@ -5,7 +5,7 @@
 # after the equals sign..
 
 # Size of the CoreOS cluster created by Vagrant
-#$num_instances=1
+$num_instances=3
 
 # Log the serial consoles of CoreOS VMs to log/
 # Enable by setting value to true, disable with false
@@ -15,3 +15,7 @@
 #$vb_gui = false
 #$vb_memory = 1024
 #$vb_cpus = 1
+
+# Private (host-only) IP space for VMs
+$ip_prefix = "172.17.8"
+$ip_cluster_start = 100

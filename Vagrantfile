@@ -2,6 +2,8 @@
 # # vi: set ft=ruby :
 
 require 'fileutils'
+require 'tempfile'
+require 'net/http'
 require_relative 'override-plugin.rb'
 
 CLOUD_CONFIG_PATH = "./user-data"
@@ -13,6 +15,8 @@ $enable_serial_logging = false
 $vb_gui = false
 $vb_memory = 1024
 $vb_cpus = 1
+$ip_prefix = "10.10.10"
+$ip_cluster_start = 100
 
 # Attempt to apply the deprecated environment variable NUM_INSTANCES to
 # $num_instances while allowing config.rb to override it
@@ -22,6 +26,24 @@ end
 
 if File.exist?(CONFIG)
 	require_relative CONFIG
+end
+
+# create a token and put in a new cloud-config file
+if File.exist?(CLOUD_CONFIG_PATH)
+  temp_file = Tempfile.new('cc')
+  uri = URI('https://discovery.etcd.io/new')
+  token = Net::HTTP.get_response(uri).body
+  begin
+    f = File.open(CLOUD_CONFIG_PATH, "r")
+    f.each_line do |line|
+      temp_file.puts line.sub(/discovery:.*\n/, "discovery: #{token}\n")
+    end
+    temp_file.close
+    FileUtils.mv(temp_file.path, CLOUD_CONFIG_PATH)
+  ensure
+    temp_file.close
+    temp_file.unlink
+  end
 end
 
 Vagrant.configure("2") do |config|
@@ -73,7 +95,7 @@ Vagrant.configure("2") do |config|
         vb.cpus = $vb_cpus
       end
 
-      ip = "172.17.8.#{i+100}"
+      ip = "#{$ip_prefix}.#{$ip_cluster_start + i}"
       config.vm.network :private_network, ip: ip
 
       # Uncomment below to enable NFS for sharing the host machine into the coreos-vagrant VM.
