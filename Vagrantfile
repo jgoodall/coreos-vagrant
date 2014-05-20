@@ -8,6 +8,9 @@ require 'tempfile'
 require 'net/http'
 require_relative 'override-plugin.rb'
 
+COREOS_CHANNEL="alpha"
+COREOS_MIN_VERSION="310.0.0"
+
 CLOUD_CONFIG_PATH = "./user-data"
 CONFIG= "config.rb"
 
@@ -55,15 +58,16 @@ if File.exist?(CLOUD_CONFIG_PATH)
 end
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "coreos-alpha"
-  config.vm.box_url = "http://storage.core-os.net/coreos/amd64-usr/alpha/coreos_production_vagrant.box"
+  config.vm.box = "coreos-#{COREOS_CHANNEL}"
+  config.vm.box_version = ">= #{COREOS_MIN_VERSION}"
+
+  config.vm.box_url = "http://storage.core-os.net/coreos/amd64-usr/#{COREOS_CHANNEL}/coreos_production_vagrant.json"
+  config.vm.provider :vmware_fusion do |vb, override|
+    override.vm.box_url = "http://storage.core-os.net/coreos/amd64-usr/#{COREOS_CHANNEL}/coreos_production_vagrant_vmware_fusion.json"
+  end
 
   config.vm.post_up_message = POST_MSG
   
-  config.vm.provider :vmware_fusion do |vb, override|
-    override.vm.box_url = "http://storage.core-os.net/coreos/amd64-usr/alpha/coreos_production_vagrant_vmware_fusion.box"
-  end
-
   # Fix docker not being able to resolve private registry in VirtualBox
   config.vm.provider :virtualbox do |vb, override|
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
