@@ -1,6 +1,8 @@
 # -*- mode: ruby -*-
 # # vi: set ft=ruby :
 
+Vagrant.require_version ">= 1.6.0"
+
 require 'fileutils'
 require 'tempfile'
 require 'net/http'
@@ -8,6 +10,12 @@ require_relative 'override-plugin.rb'
 
 CLOUD_CONFIG_PATH = "./user-data"
 CONFIG= "config.rb"
+
+POST_MSG = "
+On your local host: 
+
+  . ./configure-fleet
+"
 
 # Defaults for config options defined in CONFIG
 $num_instances = 1
@@ -50,6 +58,8 @@ Vagrant.configure("2") do |config|
   config.vm.box = "coreos-alpha"
   config.vm.box_url = "http://storage.core-os.net/coreos/amd64-usr/alpha/coreos_production_vagrant.box"
 
+  config.vm.post_up_message = POST_MSG
+  
   config.vm.provider :vmware_fusion do |vb, override|
     override.vm.box_url = "http://storage.core-os.net/coreos/amd64-usr/alpha/coreos_production_vagrant_vmware_fusion.box"
   end

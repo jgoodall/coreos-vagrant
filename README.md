@@ -52,6 +52,12 @@ Configuration is stored in the directory so you can always return to this machin
 [vagrant]: http://downloads.vagrantup.com/
 [using-coreos]: http://coreos.com/docs/using-coreos/
 
+#### Fleet Setup
+
+To use `fleetctl` from your host OS, source the `configure-fleet` script:
+
+    . ./configure-fleet
+
 #### Shared Folder Setup
 
 There is optional shared folder setup.

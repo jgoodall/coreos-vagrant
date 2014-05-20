@@ -1,0 +1,13 @@
+#!/bin/sh
+# @see https://github.com/coreos/fleet/blob/master/Documentation/remote-access.md
+
+# get first running vagrant instance
+vm=`vagrant status | grep running | cut -d' ' -f1 | head -n1`
+
+# set up ssh
+vagrant ssh-config ${vm} | sed -n "s/IdentityFile//gp" | xargs ssh-add
+FLEETCTL_TUNNEL="$(vagrant ssh-config ${vm} | sed -n "s/[ ]*HostName[ ]*//gp"):$(vagrant ssh-config ${vm} | sed -n "s/[ ]*Port[ ]*//gp")"
+export FLEETCTL_TUNNEL
+echo "Fleet Tunnel: " $FLEETCTL_TUNNEL
+echo "Fleet Machines:"
+fleetctl list-machines
